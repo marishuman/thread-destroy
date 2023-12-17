@@ -29,14 +29,15 @@ class Runnable(QRunnable):
         # Long running task
         for i in range(5):
             logging.info(f"Working in thread {self.n}, step {i + 1}/5")
-            time.sleep(random.randint(700, 2500) / 1000)
+            time.sleep(self.n)
    
             # self.window_instance.changeLabel("aaaa")
 
-class Window(QMainWindow):
+class Window(QMainWindow, QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi()
+
 
     def setupUi(self):
         self.setWindowTitle("QThreadPool + QRunnable")
@@ -59,11 +60,19 @@ class Window(QMainWindow):
 
         countBtn.clicked.connect(lambda: on_clicked(textbox.toPlainText(), self))
 
-    def changeLabel(msg, self):
-        self.textbox.setText(msg)
+    # def changeLabel(msg, self):
+    #     self.textbox.setText(msg)
+        
+    # close window 
     def closeEvent(self, event):
+        
         print('Close event fired')
+        event.accept()
+   
     
+def on_clicked(msg, self):
+    self.label.setText("Change")
+    runTasks(self, int(msg))
 
 def runTasks(self, msg):
     threadCount = QThreadPool.globalInstance().maxThreadCount()
@@ -74,10 +83,11 @@ def runTasks(self, msg):
         runnable = Runnable(i, self)
         # 3. Call start()
         pool.start(runnable)
+     # Wait for all threads to finish before closing the window
+    pool.waitForDone()
 
-def on_clicked(msg, self):
-    self.label.setText("Change")
-    runTasks(self, int(msg))
+    # Close the window after all threads finish
+    self.close()
 
 
 app = QApplication(sys.argv)
