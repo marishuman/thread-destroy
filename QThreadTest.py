@@ -17,27 +17,20 @@ logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 class Worker(QThread):
     update_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal()
 
-    def __init__(self, n, window_instance):
+    def __init__(self, thread_id, window_instance):
         super().__init__()
-        self.n = n
+        self.thread_id = thread_id
         self.window_instance = window_instance
 
-    def runTasks(window_instance, msg):
-        thread_list = []
+    def run(self):
+        for i in range(5):
+            logging.info(f"Working in thread {self.thread_id}, step {i + 1}/5")
+            time.sleep(1)
 
-        for i in range(msg):
-            worker = Worker(i, window_instance)
-            worker.update_signal.connect(window_instance.update_label)
-            worker.start()
-            thread_list.append(worker)
-
-        # Wait for all threads to finish
-        for thread in thread_list:
-            thread.wait()
-
-        # Close the window after all threads finish
-        window_instance.close()
+        self.update_signal.emit(f"Thread {self.thread_id} completed.")
+        self.finished_signal.emit()
 
 
 class Window(QMainWindow, QWidget):
@@ -78,11 +71,23 @@ def on_clicked(msg, window_instance):
 
 
 def runTasks(window_instance, msg):
+    thread_list = []
+
     for i in range(msg):
         worker = Worker(i, window_instance)
         worker.update_signal.connect(window_instance.update_label)
+        worker.finished_signal.connect(lambda: thread_finished(worker, thread_list, window_instance))
         worker.start()
+        thread_list.append(worker)
 
+
+def thread_finished(worker, thread_list, window_instance):
+    if worker in thread_list:
+        thread_list.remove(worker)
+        worker.deleteLater()
+
+        if not thread_list:
+            window_instance.close()
 
 app = QApplication(sys.argv)
 window = Window()
