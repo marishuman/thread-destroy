@@ -1,4 +1,5 @@
 
+import math
 import pyqtgraph as pg
 
 from pyqtgraph import PlotWidget
@@ -140,24 +141,39 @@ class Window(QMainWindow, QWidget):
         img = img[np.newaxis, :, :]
  
         # decay data
-        decay = np.exp(-np.linspace(0, 0.3, 100))[:, np.newaxis, np.newaxis]
- 
+        decay = np.exp(-np.linspace(0, 0.3, 200))[:, np.newaxis, np.newaxis]
+        
         # random data
-        data = np.random.normal(size=(100, 200, 200))
+        data = np.random.normal(size=(200, 200, 200))
         data += img * decay
         data += 2
+        
+        # Cartesian coordinates from data
+        x_index = 0  # x column index
+        y_index = 1  # y column index
+        x_column = data[x_index, :, :]
+        y_column = data[y_index, :, :]
+
+        # Convert Cartesian to polar coordinates
+        radius = np.sqrt(x_column**2 + y_column**2)
+        theta = np.arctan2(y_column, x_column)
+
+        # Replace the original data with polar coordinates
+        data[x_index, :, :] = radius
+        data[y_index, :, :] = theta
+
  
-        # adding time-varying signal
-        sig = np.zeros(data.shape[0])
-        sig[30:] += np.exp(-np.linspace(1, 10, 70))
-        sig[40:] += np.exp(-np.linspace(1, 10, 60))
-        sig[70:] += np.exp(-np.linspace(1, 10, 30))
+        # # adding time-varying signal
+        # sig = np.zeros(data.shape[0])
+        # sig[30:] += np.exp(-np.linspace(1, 10, 70))
+        # sig[40:] += np.exp(-np.linspace(1, 10, 60))
+        # sig[70:] += np.exp(-np.linspace(1, 10, 30))
  
-        sig = sig[:, np.newaxis, np.newaxis] * 3
-        data[:, 50:60, 30:40] += sig
+        # sig = sig[:, np.newaxis, np.newaxis] * 3
+        # data[:, 50:60, 30:40] += sig
  
         # Displaying the data and assign each frame a time value from 1.0 to 3.0
-        imv.setImage(data, xvals=np.linspace(1., 3., data.shape[0]))
+        imv.setImage(data)
  
         # Set a custom color map
         colors = [
@@ -180,7 +196,7 @@ class Window(QMainWindow, QWidget):
  
         # setting this layout to the widget
         self.centralWidget.setLayout(layout)
-        
+
         # plot window goes on right side, spanning 3 rows
         layout.addWidget(imv, 0, 1, 3, 1)
  
