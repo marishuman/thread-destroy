@@ -1,11 +1,8 @@
 
 import math
 import pyqtgraph as pg
-
 from pyqtgraph import PlotWidget
 import pyqtgraph.exporters
-
-
 import logging
 import numpy as np
 from vispy import app, gloo
@@ -187,10 +184,26 @@ class Window(QMainWindow, QWidget):
  
         # color map
         cmap = pg.ColorMap(pos=np.linspace(0.0, 1.0, 6), color=colors)
- 
+        
+
         # setting color map to the image view
         imv.setColorMap(cmap)
- 
+
+        # Disable scroll zooming
+        imv.view.setMouseEnabled(x=False, y=False)
+
+        # Disable the histogram (color bar)
+        imv.ui.histogram.hide()
+
+        # Disable the ROI button
+        imv.ui.roiBtn.hide()
+
+        # Disable the ROI plot
+        imv.ui.roiPlot.hide()
+
+        # Hide the menu
+        imv.ui.menuBtn.hide()
+
         # Creating a grid layout
         layout = QGridLayout()
  
