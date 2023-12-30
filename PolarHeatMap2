@@ -1,0 +1,247 @@
+
+import pyqtgraph as pg
+
+from pyqtgraph import PlotWidget
+import pyqtgraph.exporters
+
+
+import logging
+import numpy as np
+from vispy import app, gloo
+from vispy.util.transforms import perspective, translate, rotate
+from vispy.geometry import meshdata as md
+from vispy.geometry import generation as gen
+import sys
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+    QTextEdit, 
+    QHBoxLayout,
+    QGridLayout
+)
+
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from time import sleep
+pg.setConfigOption('background', 'lightgray')
+
+w = None
+
+class Worker(QThread):
+    update_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal()
+
+    def __init__(self, thread_id):
+        super().__init__()
+        self.thread_id = thread_id
+        self.cnt = 0
+        self.running = False
+
+    def run(self):
+        self.running = True
+        while self.running:
+            self.update_signal.emit(f"pass {self.thread_id} cnt {self.cnt}")
+            self.cnt += 1
+    
+    def quit(self):
+        self.running = False
+
+
+
+
+class Window(QMainWindow, QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+
+        # # generate something to export
+        # plt = pg.plot([1,5,2,4,3])
+
+        # # create an exporter instance, as an argument give it
+        # # the item you wish to export
+        # exporter = pg.exporters.ImageExporter(plt.plotItem)
+
+        # # set export parameters if needed
+        # exporter.parameters()['width'] = 100   # (note this also affects height parameter)
+        # global w
+        # w = pg.ColorMapWidget()
+
+        # export to widget
+        # exporter = pg.exporters.ImageExporter( w.scene() )
+        # self.worker = Worker(parent)
+
+        self.setupUi()
+        
+
+
+    
+
+    # def plot_polar_coordinate(self, x, y):
+        # Convert individual x and y coordinates to polar coordinates
+        # r = np.sqrt(x**2 + y**2)
+        # theta = np.arctan2(y, x)
+
+        # self.setWindowTitle("Heatmap")
+        # self.setStyleSheet("background-color: lightgray;")
+        # self.resize(500, 500)
+
+        # layout = QVBoxLayout()  # Adjust layout for better organization
+
+        # graphWidget = pg.ImageView()
+        # # Generating a simple heatmap using the provided polar coordinates
+        # data = np.random.rand(5, 5)
+        # graphWidget.setImage(data)
+        # # Defining a colormap for the heatmap
+        # colors = [(0, 0, 0), (4, 5, 61), (84, 42, 55), (15, 87, 60), (208, 17, 141), (255, 255, 255)]
+        # colormap = pg.ColorMap(pos=np.linspace(0.0, 1.0, 6), color=colors)
+        # graphWidget.setColorMap(colormap)
+
+        # layout.addWidget(graphWidget)
+
+        # widget = QWidget()
+        # widget.setLayout(layout)
+
+        # self.setCentralWidget(widget)
+
+    # def add_points(self):
+        # generate something to export
+  
+        # self.plot_polar_coordinate(1, 1)
+            
+
+    
+    def setupUi(self):
+        self.working = False
+               # creating a widget object
+        
+        self.setWindowTitle("QThread")
+        self.resize(250, 150)
+        self.centralWidget = QWidget()
+        self.setCentralWidget(self.centralWidget)
+        
+        # widget = QWidget()
+ 
+        # creating a label
+        label = QLabel("Geeksforgeeks Image View")
+ 
+        # setting minimum width
+        label.setMinimumWidth(130)
+ 
+        # making label do word wrap
+        label.setWordWrap(True)
+ 
+        # setting configuration options
+        pg.setConfigOptions(antialias=True)
+ 
+        # creating image view object
+        imv = pg.ImageView()
+ 
+        # Create random 3D data set with noisy signals
+        img = pg.gaussianFilter(np.random.normal(
+            size=(200, 200)), (5, 5)) * 20 + 100
+ 
+        # setting new axis to image
+        img = img[np.newaxis, :, :]
+ 
+        # decay data
+        decay = np.exp(-np.linspace(0, 0.3, 100))[:, np.newaxis, np.newaxis]
+
+        # Generating grid of coordinates
+        x, y = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
+        # Creating a circle with radius 1
+        mask = x**2 + y**2 <= 1
+
+        # Generating NaN values outside the circle
+        data = np.ones_like(x)
+        data[~mask] = np.nan
+
+        # Creating a plot
+        plot = pg.plot()
+        img = pg.ImageItem()
+        plot.addItem(img)
+
+        # Assigning colors to NaN and non-NaN values
+        color_map = pg.ColorMap(pos=[0.0, 1.0], color=[(10, 100,50), (255, 255, 255)])
+        lut = color_map.getLookupTable(0.0, 1.0, 256)
+        img.setImage(data, lut=lut)
+ 
+        # setting color map to the image view
+        imv.setColorMap(color_map)
+ 
+        # Creating a grid layout
+        layout = QGridLayout()
+ 
+        # minimum width value of the label
+        label.setFixedWidth(130)
+ 
+        # setting this layout to the widget
+        self.centralWidget.setLayout(layout)
+ 
+        # adding label in the layout
+        layout.addWidget(label, 1, 0)
+ 
+        # plot window goes on right side, spanning 3 rows
+        layout.addWidget(imv, 0, 1, 3, 1)
+ 
+        # setting this widget as central widget of the main window
+        self.setCentralWidget(self.centralWidget)
+
+        # self.add_points()
+        
+        
+
+        self.label = QLabel("Hello, World!")
+        self.label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+        self.countBtn = QPushButton("Start!")
+
+        layout = QVBoxLayout()
+        self.textbox = QTextEdit()
+        layout.addWidget(self.label)
+        layout.addWidget(w)
+        layout.addWidget(self.countBtn)
+        layout.addWidget(self.textbox)
+        self.centralWidget.setLayout(layout)
+        self.countBtn.clicked.connect(self.countBtnClicked)
+
+        self.cnts = 0
+
+    def closeEvent(self, event):
+        if self.working:
+            self.stopWorker()
+        print('Close event fired')
+        event.accept()
+
+    def update_label(self, msg):
+        self.textbox.setText(msg)
+        
+    def startWorker(self):
+        self.worker = Worker(self.cnts)
+        self.worker.update_signal.connect(self.update_label)
+        self.worker.start()
+        self.working = True
+
+    def stopWorker(self):
+        self.worker.quit()
+        self.worker.wait()
+        self.cnts += 1
+        self.working = False
+                        
+    def countBtnClicked(self):
+        if not self.working:
+            self.startWorker()
+            self.countBtn.setText("Stop!")
+        else:
+            self.stopWorker()
+            self.countBtn.setText("Start!")
+
+    
+
+app = QApplication(sys.argv)
+window = Window()
+window.show()
+sys.exit(app.exec())
