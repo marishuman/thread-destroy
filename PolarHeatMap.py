@@ -48,74 +48,16 @@ class Worker(QThread):
     def quit(self):
         self.running = False
 
-
-
-
 class Window(QMainWindow, QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-
-        # # generate something to export
-        # plt = pg.plot([1,5,2,4,3])
-
-        # # create an exporter instance, as an argument give it
-        # # the item you wish to export
-        # exporter = pg.exporters.ImageExporter(plt.plotItem)
-
-        # # set export parameters if needed
-        # exporter.parameters()['width'] = 100   # (note this also affects height parameter)
-        # global w
-        # w = pg.ColorMapWidget()
-
-        # export to widget
-        # exporter = pg.exporters.ImageExporter( w.scene() )
-        # self.worker = Worker(parent)
-
         self.setupUi()
-        
-
-
-    
-
-    # def plot_polar_coordinate(self, x, y):
-        # Convert individual x and y coordinates to polar coordinates
-        # r = np.sqrt(x**2 + y**2)
-        # theta = np.arctan2(y, x)
-
-        # self.setWindowTitle("Heatmap")
-        # self.setStyleSheet("background-color: lightgray;")
-        # self.resize(500, 500)
-
-        # layout = QVBoxLayout()  # Adjust layout for better organization
-
-        # graphWidget = pg.ImageView()
-        # # Generating a simple heatmap using the provided polar coordinates
-        # data = np.random.rand(5, 5)
-        # graphWidget.setImage(data)
-        # # Defining a colormap for the heatmap
-        # colors = [(0, 0, 0), (4, 5, 61), (84, 42, 55), (15, 87, 60), (208, 17, 141), (255, 255, 255)]
-        # colormap = pg.ColorMap(pos=np.linspace(0.0, 1.0, 6), color=colors)
-        # graphWidget.setColorMap(colormap)
-
-        # layout.addWidget(graphWidget)
-
-        # widget = QWidget()
-        # widget.setLayout(layout)
-
-        # self.setCentralWidget(widget)
-
-    # def add_points(self):
-        # generate something to export
-  
-        # self.plot_polar_coordinate(1, 1)
             
-
-    
     def setupUi(self):
         self.working = False
-               # creating a widget object
+        # creating a widget object
         
         self.setWindowTitle("QThread")
         self.resize(250, 150)
