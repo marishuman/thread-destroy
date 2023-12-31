@@ -139,7 +139,8 @@ class Window(QMainWindow, QWidget):
  
         # decay data
         decay = np.exp(-np.linspace(0, 0.3, 200))[:, np.newaxis, np.newaxis]
-        
+    
+
         # random data
         data = np.random.normal(size=(200, 200, 200))
         data += img * decay
@@ -148,27 +149,30 @@ class Window(QMainWindow, QWidget):
         # Cartesian coordinates from data
         x_index = 0  # x column index
         y_index = 1  # y column index
-        x_column = data[x_index, :, :]
-        y_column = data[y_index, :, :]
+        radius= data[x_index, :, :]
+        theta = data[y_index, :, :]
 
         # Convert Cartesian to polar coordinates
-        radius = np.sqrt(x_column**2 + y_column**2)
-        theta = np.arctan2(y_column, x_column)
+        x_column = radius*np.cos(theta)
+        y_column = radius*np.sin(theta)
+
 
         # Replace the original data with polar coordinates
-        data[x_index, :, :] = radius
-        data[y_index, :, :] = theta
+        data[x_index, :, :] = x_column
+        data[y_index, :, :] = y_column
 
- 
-        # # adding time-varying signal
-        # sig = np.zeros(data.shape[0])
-        # sig[30:] += np.exp(-np.linspace(1, 10, 70))
-        # sig[40:] += np.exp(-np.linspace(1, 10, 60))
-        # sig[70:] += np.exp(-np.linspace(1, 10, 30))
- 
-        # sig = sig[:, np.newaxis, np.newaxis] * 3
-        # data[:, 50:60, 30:40] += sig
- 
+        # Generate grid coordinates
+        x, y = np.meshgrid(np.linspace(-1, 1, 200), np.linspace(-1, 1, 200))
+
+        # Create a circular mask
+        mask = x**2 + y**2 <= 1
+
+        # Set values outside circle as NaN
+        data[0][~mask] = np.nan
+
+        # Set values outside circle as NaN
+        data[1][~mask] = np.nan
+
         # Displaying the data and assign each frame a time value from 1.0 to 3.0
         imv.setImage(data)
  
@@ -184,7 +188,6 @@ class Window(QMainWindow, QWidget):
  
         # color map
         cmap = pg.ColorMap(pos=np.linspace(0.0, 1.0, 6), color=colors)
-        
 
         # setting color map to the image view
         imv.setColorMap(cmap)
@@ -218,8 +221,7 @@ class Window(QMainWindow, QWidget):
 
         # self.add_points()
         
-        
-
+    
         self.label = QLabel("Hello, World!")
         self.label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.countBtn = QPushButton("Start!")
