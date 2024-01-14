@@ -48,6 +48,7 @@ class Worker(QThread):
     def quit(self):
         self.running = False
 
+
 class Window(QMainWindow, QWidget):
 
     def __init__(self, parent=None):
