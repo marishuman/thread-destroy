@@ -1,4 +1,3 @@
-
 import math
 import pyqtgraph as pg
 from pyqtgraph import PlotWidget
@@ -47,7 +46,6 @@ class Worker(QThread):
     
     def quit(self):
         self.running = False
-
 
 class Window(QMainWindow, QWidget):
 
