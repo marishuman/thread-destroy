@@ -28,9 +28,12 @@ class App(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height)
     
         # Create textbox
-        self.textbox = QLineEdit(self)
-        self.textbox.move(20, 20)
-        self.textbox.resize(280,40)
+        self.textbox1 = QLineEdit(self)
+        self.textbox2 = QLineEdit(self)
+        self.textbox1.move(20, 20)
+        self.textbox1.resize(100,40)
+        self.textbox2.move(200, 20)
+        self.textbox2.resize(100,40)
         
         # Create a button in the window
         self.button = QPushButton('Show text', self)
@@ -42,12 +45,13 @@ class App(QMainWindow):
     
     @pyqtSlot()
     def on_click(self):
-        textboxValue = self.textbox.text()
-        print(textboxValue)
-        socket.send_pyobj({textboxValue:[textboxValue]})
+        textboxValue1 = self.textbox1.text()
+        textboxValue2 = self.textbox2.text()
+        print(textboxValue1)
+        socket.send_pyobj({textboxValue1:[textboxValue1], textboxValue2:[textboxValue2]})
 
-        QMessageBox.question(self, 'Message - pythonspot.com', "You typed: " + textboxValue, QMessageBox.Ok, QMessageBox.Ok)
-        self.textbox.setText("")
+        QMessageBox.question(self, 'Message - pythonspot.com', "You typed: " + textboxValue1 + " and " + textboxValue2, QMessageBox.Ok, QMessageBox.Ok)
+        self.textbox1.setText("")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

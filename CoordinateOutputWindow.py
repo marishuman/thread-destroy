@@ -10,5 +10,6 @@ listeners = ["hi", "hello"]
 while(True):
     message = socket.recv_pyobj()
     first_value = list(message)[0]
-    if(first_value in listeners):
-        print(first_value)
+    second_value = list(message)[1]
+    print(first_value)
+    print(second_value)
