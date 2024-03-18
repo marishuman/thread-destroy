@@ -10,5 +10,5 @@ listener = ["hi", "hello"]
 while(True):
     message = socket.recv_pyobj()
     msgIndex = message.keys()[0]
-    if(msgIndex in listeners):
+    if(msgIndex in listener):
         print(message.get(msgIndex))
