@@ -1,4 +1,6 @@
 import math
+import threading
+import time
 import pyqtgraph as pg
 from pyqtgraph import PlotWidget
 import pyqtgraph.exporters
@@ -24,9 +26,14 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from time import sleep
+
+import zmq
+
+from radar_format import MAG_TYPE, MOMENT_PORT, unpackRadData
 pg.setConfigOption('background', 'lightgray')
 
 w= None
+running = True
 
 class Worker(QThread):
     update_signal = pyqtSignal(str)
@@ -53,6 +60,7 @@ class Window(QMainWindow, QWidget):
         super().__init__(parent)
 
         self.setupUi()
+    
             
     def setupUi(self):
         self.working = False
@@ -64,7 +72,10 @@ class Window(QMainWindow, QWidget):
         self.setCentralWidget(self.centralWidget)
         
         # widget = QWidget()
-
+        subscriber_thread = RadSubscriber()
+        subscriber_thread.start()
+        subscriber_thread = RadSubscriber()
+        subscriber_thread.start()
         # setting configuration options
         pg.setConfigOptions(antialias=True)
  
@@ -207,9 +218,32 @@ class Window(QMainWindow, QWidget):
             self.stopWorker()
             self.countBtn.setText("Start!")
 
-    
+#SUBSCRIBER PART
+class RadSubscriber(threading.Thread):
+    #sets up the subscriber to take in the publisher data from simulation.py
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.socket = zmq.Context().socket(zmq.SUB)
+        self.socket.connect("tcp://localhost:%s" % MOMENT_PORT)
+        self.socket.setsockopt(zmq.SUBSCRIBE, MAG_TYPE)
+        self.poller = zmq.Poller()
+        self.poller.register(self.socket, zmq.POLLIN)
+    #prints out the data published by the publisher in simulation.py in the format below
+    def run(self):
+        while running:
+            rsv = dict(self.poller.poll(.5))
+            if rsv:
+                if rsv.get(self.socket) == zmq.POLLIN:
+                    s = self.socket.recv()
+                    s = s[len(MAG_TYPE)::]
+                    [ant, azi, sec, tic, sps, data] = unpackRadData(s)
+                    print("ant %d,\tazimuth %f,\tsec %d,\ttic %d" % (ant, azi, sec, tic))
+                   
+        self.socket.close()
+        
 
 app = QApplication(sys.argv)
 window = Window()
 window.show()
+
 sys.exit(app.exec())
