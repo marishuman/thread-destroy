@@ -299,9 +299,7 @@ class RadSubscriber(threading.Thread):
                     s = s[len(MAG_TYPE)::]
                     [ant, azi, sec, tic, sps, data] = unpackRadData(s)
                     # print("ant %d,\tazimuth %f,\tsec %d,\ttic %d" % (ant, azi, sec, tic))
-                    self.latest_data = process_radar_data(data)  # Implement this function to process radar data
-
-    
+                    self.latest_data = process_radar_data(data)
 
     def get_latest_data(self):
         # return self.latest_data
